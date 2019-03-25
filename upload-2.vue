@@ -1,7 +1,7 @@
 <template>
-<div class="vue-image-crop-upload" v-show="value">
+<div class="vue-image-crop-upload" v-bind:class="{'as-modal': modal}" v-show="value" :modal="asModal">
 	<div class="vicp-wrap">
-		<div class="vicp-close" @click="off">
+		<div class="vicp-close" v-if="modal == true" @click="off">
 			<i class="vicp-icon4"></i>
 		</div>
 
@@ -19,7 +19,7 @@
 			<div class="vicp-error" v-show="hasError">
 				<i class="vicp-icon2"></i> {{ errorMsg }}
 			</div>
-			<div class="vicp-operate">
+			<div class="vicp-operate" v-if="modal == true">
 				<a @click="off" @mousedown="ripple">{{ lang.btn.off }}</a>
 			</div>
 		</div>
@@ -110,6 +110,11 @@ import effectRipple from './utils/effectRipple.js';
 
 export default {
 	props: {
+		// render in a modal or in place
+		modal: {
+			type: Boolean,
+			default: true
+		},
 		// 域，上传文件name，触发事件会带上（如果一个页面多个图片上传控件，可以做区分
 		field: {
 			type: String,
@@ -201,6 +206,7 @@ export default {
 	data() {
 		let that = this,
 			{
+				modal,
 				imgFormat,
 				langType,
 				langExt,
@@ -225,6 +231,9 @@ export default {
 			isSupported = false;
 		}
 		return {
+			// modal
+			asModal: true,
+
 			// 图片的mime
 			mime,
 
@@ -405,12 +414,18 @@ export default {
 		},
 		// 关闭控件
 		off() {
-			setTimeout(()=> {
-				this.$emit('input', false);
-				if(this.step == 3 && this.loading == 2){
-					this.setStep(1);
-				}
-			}, 200);
+			if(this.modal == true) {
+				setTimeout(()=> {
+					this.$emit('input', false);
+					if(this.step == 3 && this.loading == 2){
+						this.setStep(1);
+					}
+				}, 200);
+			} else {
+				this.setStep(1);
+				this.reset();
+			}
+
 		},
 		// 设置步骤
 		setStep(no) {
@@ -875,11 +890,14 @@ export default {
 	},
 	created(){
 		// 绑定按键esc隐藏此插件事件
-		document.addEventListener('keyup', (e)=>{
-			if(this.value && (e.key == 'Escape' || e.keyCode == 27)){
-				this.off();
-			}
-		})
+		if(this.modal == true) {
+			console.log('event listener for modal esc');
+			document.addEventListener('keyup', (e)=>{
+				if(this.value && (e.key == 'Escape' || e.keyCode == 27)){
+					this.off();
+				}
+			})
+		}
 	}
 }
 
@@ -923,40 +941,48 @@ export default {
             transform: scale(1) translatey(0); } }
 
 .vue-image-crop-upload {
-  position: fixed;
   display: block;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
-  z-index: 10000;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.65);
-  -webkit-tap-highlight-color: transparent;
-  -moz-tap-highlight-color: transparent; }
+}
+.as-modal {
+  position: fixed;
+	z-index: 10000;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: rgba(0, 0, 0, 0.65);
+	-webkit-tap-highlight-color: transparent;
+  -moz-tap-highlight-color: transparent;
+}
   .vue-image-crop-upload .vicp-wrap {
     -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.23);
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.23);
-    position: fixed;
     display: block;
     -webkit-box-sizing: border-box;
             box-sizing: border-box;
-    z-index: 10000;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
     margin: auto;
-    width: 600px;
-    height: 330px;
+    width: 100%;
+    height: 100%;
     padding: 25px;
     background-color: #fff;
     border-radius: 2px;
-    -webkit-animation: vicp 0.12s ease-in;
-            animation: vicp 0.12s ease-in; }
+  }
+		.as-modal .vicp-wrap {
+			position: fixed;
+			z-index: 10000;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			width: 600px;
+			height: 330px;
+			-webkit-animation: vicp 0.12s ease-in;
+	            animation: vicp 0.12s ease-in;
+		}
     .vue-image-crop-upload .vicp-wrap .vicp-close {
       position: absolute;
       right: -30px;
@@ -999,12 +1025,16 @@ export default {
       position: relative;
       -webkit-box-sizing: border-box;
               box-sizing: border-box;
-      padding: 35px;
-      height: 170px;
+      padding: 70px;
+			height: 100%;
       background-color: rgba(0, 0, 0, 0.03);
       text-align: center;
       border: 1px dashed rgba(0, 0, 0, 0.08);
       overflow: hidden; }
+		.as-modal .vicp-wrap .vicp-step1 .vicp-drop-area {
+			height: 170px;
+			padding: 35px;
+		}
       .vue-image-crop-upload .vicp-wrap .vicp-step1 .vicp-drop-area .vicp-icon1 {
         display: block;
         margin: 0 auto 6px;

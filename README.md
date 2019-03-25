@@ -113,6 +113,7 @@ $ npm install vue-image-crop-upload
 | value             | Boolean            | twoWay            | show or not    |
 | params             | Object            |  null                | POST Params，like "{k:v}"    |
 | headers             | Object            |  null                | POST request header，like "{k:v}"    |
+| modal             | Boolean            | true            | open as modal or in place    |
 | langType             | String            | 'zh'                 | language type    |
 | langExt             | Object            |                   | language extend    |
 | width             | Number            |   200                | width of receive image     |
